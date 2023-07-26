@@ -21,7 +21,7 @@ public class LoanController {
     }
 
     @GetMapping("loan/{status}")
-    public void startLoanTransactions(@PathVariable("Status") String status) throws JsonProcessingException {
+    public void startLoanTransactions(@PathVariable("Status") Boolean status) throws JsonProcessingException {
         transactionService.initAsynchronousProcess(status);
     }
 }

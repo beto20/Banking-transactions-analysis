@@ -1,11 +1,10 @@
 package com.alberto.transactions.service;
 
-import com.alberto.transactions.model.TransactionDto;
+import com.alberto.transactions.model.CreditCardDto;
+import com.alberto.transactions.model.IdentityDto;
 import com.alberto.transactions.publisher.PublisherTransaction;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -14,8 +13,7 @@ import java.util.UUID;
 @Service
 @Qualifier("credit-card-service")
 public class CreditCardServiceImpl implements TransactionService {
-    Logger logger = LoggerFactory.getLogger(CreditCardServiceImpl.class);
-
+    private Boolean IS_ACTIVE = Boolean.FALSE;
     @Qualifier("credit-card-publisher")
     private final PublisherTransaction publisherTransaction;
 
@@ -24,31 +22,48 @@ public class CreditCardServiceImpl implements TransactionService {
     }
 
     @Override
-    public void initAsynchronousProcess(String status) throws JsonProcessingException {
-        var transaction = new TransactionDto();
-
-        transaction.setId(UUID.randomUUID().toString());
-        transaction.setName("Mario");
-        transaction.setMiddleName("Jesus");
-        transaction.setLastname("Perez");
-        transaction.setMotherLastname("Luna");
-        transaction.setIdentity(new TransactionDto.Identity("DNI", "12345678"));
-        transaction.setTotalAmount("10000.00");
-        transaction.setDate("23/07/2023");
-        transaction.setCreditLine("100000.00");
-        transaction.setExpirationDate("10/2025");
-        transaction.setCardNumber("102938475612345");
-        transaction.setCardBrand("VISA");
-        transaction.setCardType("SIGNATURE");
-        transaction.setClientResult("INVESTIGADO");
-        transaction.setCurrency("PEN");
-
-        ObjectMapper mapper = new ObjectMapper();
-        String json = mapper.writeValueAsString(transaction);
-
-        publisherTransaction.publishMessage(json);
+    public void initAsynchronousProcess(Boolean status) throws JsonProcessingException {
+        IS_ACTIVE = status;
+        while (IS_ACTIVE) {
+            try {
+                var data = generateCreditCardTx();
+                publisherTransaction.publishMessage(data);
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
+
+    private String generateCreditCardTx() throws JsonProcessingException {
+        var creditCardDto = new CreditCardDto();
+
+        creditCardDto.setId(UUID.randomUUID().toString());
+        creditCardDto.setName("Mario");
+        creditCardDto.setMiddleName("Jesus");
+        creditCardDto.setLastname("Perez");
+        creditCardDto.setMotherLastname("Luna");
+        creditCardDto.setIdentity(new IdentityDto("DNI", "12345678"));
+        creditCardDto.setQualification("INVESTIGADO");
+
+        creditCardDto.setCreditLine("100000.00");
+        creditCardDto.setCardExpiration("10/25");
+        creditCardDto.setCardNumber("102938475612345");
+        creditCardDto.setCardBrand("VISA");
+        creditCardDto.setCardType("SIGNATURE");
+        creditCardDto.setDisbursementAmount("6500.00");
+        creditCardDto.setDisbursementDate("25/07/2023");
+        creditCardDto.setCurrency("PEN");
+        creditCardDto.setHasInsurance(Boolean.TRUE);
+        creditCardDto.setStatus("Active");
+
+        creditCardDto.setStore("Ripley");
+        creditCardDto.setProvince("Lima");
+
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(creditCardDto);
+    }
 
 
 }

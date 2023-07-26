@@ -21,7 +21,7 @@ public class CreditCardController {
     }
 
     @GetMapping("credit-card/{status}")
-    public void startCreditCardTransactions(@PathVariable("Status") String status) throws JsonProcessingException {
+    public void startCreditCardTransactions(@PathVariable("Status") Boolean status) throws JsonProcessingException {
         transactionService.initAsynchronousProcess(status);
     }
 
