@@ -18,8 +18,8 @@ public class CreditCardDto implements Serializable {
     private String name;
     private String middleName;
     private String lastname;
-    private String motherLastname;
-    private IdentityDto identity;
+    private String document;
+    private String number;
     private String qualification; // investigado - aprobado - rechazado
 
     // CreditCard information
@@ -33,8 +33,14 @@ public class CreditCardDto implements Serializable {
     private String currency; // PEN, EUR, USD
     private String interestRate;
     private Boolean hasInsurance;
-    private InsuranceDto insurance;
     private String status;
+
+    // Insurance information
+    private String product;
+    private String policyNumber;
+    private String paymentAmount;
+    private String paymentFrequency;
+    private String paymentCurrency;
 
     // Location information
     private String store;

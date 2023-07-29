@@ -18,8 +18,8 @@ public class LoanDto implements Serializable {
     private String name;
     private String middleName;
     private String lastname;
-    private String motherLastname;
-    private IdentityDto identity;
+    private String document;
+    private String number;
     private String qualification; // investigado - aprobado - rechazado
 
     // Loan information
@@ -31,11 +31,17 @@ public class LoanDto implements Serializable {
     private String quota;
     private String interestRate;
     private Boolean hasInsurance;
-    private InsuranceDto insurance;
     private String status;
 
+    // Insurance information
+    private String product;
+    private String policyNumber;
+    private String paymentAmount;
+    private String paymentFrequency;
+    private String paymentCurrency;
+
+
     // Store information
-    private String store;
     private String province;
     private String authorizer;
 

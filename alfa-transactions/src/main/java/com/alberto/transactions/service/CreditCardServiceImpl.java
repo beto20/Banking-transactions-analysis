@@ -1,13 +1,12 @@
 package com.alberto.transactions.service;
 
 import com.alberto.transactions.model.CreditCardDto;
-import com.alberto.transactions.model.IdentityDto;
 import com.alberto.transactions.publisher.PublisherTransaction;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.UUID;
 
 @Service
@@ -22,12 +21,14 @@ public class CreditCardServiceImpl implements TransactionService {
     }
 
     @Override
-    public void initAsynchronousProcess(Boolean status) throws JsonProcessingException {
+    public void initAsynchronousProcess(Boolean status) {
         IS_ACTIVE = status;
+        int i = 0;
         while (IS_ACTIVE) {
             try {
-                var data = generateCreditCardTx();
+                var data = generateCreditCardTx(i);
                 publisherTransaction.publishMessage(data);
+                i++;
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
@@ -36,15 +37,38 @@ public class CreditCardServiceImpl implements TransactionService {
     }
 
 
-    private String generateCreditCardTx() throws JsonProcessingException {
+    private String generateCreditCardTx(int iteration) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            var creditCardDtoArray = readDataFromJson();
+            return mapper.writeValueAsString(creditCardDtoArray[iteration]);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private CreditCardDto[] readDataFromJson() {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            var creditCardArray = mapper.readValue(new File("src/main/resources/credit-card-mock-data.json"), CreditCardDto[].class);
+
+            System.out.println(creditCardArray[0].getId());
+            System.out.println(creditCardArray[1].getId());
+            return creditCardArray;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private CreditCardDto dataMock() {
         var creditCardDto = new CreditCardDto();
 
         creditCardDto.setId(UUID.randomUUID().toString());
         creditCardDto.setName("Mario");
         creditCardDto.setMiddleName("Jesus");
         creditCardDto.setLastname("Perez");
-        creditCardDto.setMotherLastname("Luna");
-        creditCardDto.setIdentity(new IdentityDto("DNI", "12345678"));
+        creditCardDto.setDocument("DNI");
+        creditCardDto.setNumber("12345678");
         creditCardDto.setQualification("INVESTIGADO");
 
         creditCardDto.setCreditLine("100000.00");
@@ -58,12 +82,16 @@ public class CreditCardServiceImpl implements TransactionService {
         creditCardDto.setHasInsurance(Boolean.TRUE);
         creditCardDto.setStatus("Active");
 
+        creditCardDto.setProduct("SEGURO_TARJETAS_360");
+        creditCardDto.setPolicyNumber("123456");
+        creditCardDto.setPaymentAmount("100");
+        creditCardDto.setPaymentFrequency("MENSUAL");
+        creditCardDto.setPaymentCurrency("PEN");
+
         creditCardDto.setStore("Ripley");
         creditCardDto.setProvince("Lima");
 
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.writeValueAsString(creditCardDto);
+        return creditCardDto;
     }
-
 
 }

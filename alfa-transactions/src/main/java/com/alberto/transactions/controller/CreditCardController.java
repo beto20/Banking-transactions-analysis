@@ -2,7 +2,6 @@ package com.alberto.transactions.controller;
 
 
 import com.alberto.transactions.service.TransactionService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,7 +20,7 @@ public class CreditCardController {
     }
 
     @GetMapping("credit-card/{status}")
-    public void startCreditCardTransactions(@PathVariable("Status") Boolean status) throws JsonProcessingException {
+    public void startCreditCardTransactions(@PathVariable("Status") Boolean status) {
         transactionService.initAsynchronousProcess(status);
     }
 

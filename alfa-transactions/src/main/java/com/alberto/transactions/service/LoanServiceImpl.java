@@ -1,6 +1,6 @@
 package com.alberto.transactions.service;
 
-import com.alberto.transactions.model.IdentityDto;
+import com.alberto.transactions.model.CreditCardDto;
 import com.alberto.transactions.model.LoanDto;
 import com.alberto.transactions.publisher.PublisherTransaction;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.UUID;
 
 @Service
@@ -26,12 +27,14 @@ public class LoanServiceImpl implements TransactionService {
     }
 
     @Override
-    public void initAsynchronousProcess(Boolean status) throws JsonProcessingException {
+    public void initAsynchronousProcess(Boolean status) {
         IS_ACTIVE = status;
+        int i = 0;
         while (IS_ACTIVE) {
             try {
-                var data = generateLoanTx();
+                var data = generateLoanTx(i);
                 publisherTransaction.publishMessage(data);
+                i++;
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
@@ -39,15 +42,38 @@ public class LoanServiceImpl implements TransactionService {
         }
     }
 
-    private String generateLoanTx() throws JsonProcessingException {
+    private String generateLoanTx(int iteration) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            var loanDtoArray = readDataFromJson();
+            return mapper.writeValueAsString(loanDtoArray[iteration]);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private LoanDto[] readDataFromJson() {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            var loanArray = mapper.readValue(new File("src/main/resources/loan-mock-data.json"), LoanDto[].class);
+
+            System.out.println(loanArray[0].getId());
+            System.out.println(loanArray[1].getId());
+            return loanArray;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private LoanDto dataMock() {
         var loanDto = new LoanDto();
 
         loanDto.setId(UUID.randomUUID().toString());
         loanDto.setName("Mario");
         loanDto.setMiddleName("Jesus");
         loanDto.setLastname("Perez");
-        loanDto.setMotherLastname("Luna");
-        loanDto.setIdentity(new IdentityDto("DNI", "12345678"));
+        loanDto.setDocument("DNI");
+        loanDto.setNumber("12345678");
         loanDto.setQualification("INVESTIGADO");
 
         loanDto.setAccountNumber("20394857612");
@@ -60,12 +86,17 @@ public class LoanServiceImpl implements TransactionService {
         loanDto.setHasInsurance(Boolean.TRUE);
         loanDto.setStatus("Active");
 
-        loanDto.setStore("Centro civico");
+        loanDto.setProduct("SEGURO_TARJETAS_360");
+        loanDto.setPolicyNumber("123456");
+        loanDto.setPaymentAmount("100");
+        loanDto.setPaymentFrequency("MENSUAL");
+        loanDto.setPaymentCurrency("PEN");
+
         loanDto.setProvince("Lima");
         loanDto.setAuthorizer("XT1234");
 
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.writeValueAsString(loanDto);
+        return loanDto;
     }
+
 
 }
